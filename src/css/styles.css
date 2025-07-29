@@ -9,3 +9,6 @@
 @import url('./base.css');
 
 
+.hidden {
+  display: none;
+}
