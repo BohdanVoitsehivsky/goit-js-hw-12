@@ -5,9 +5,10 @@ import "izitoast/dist/css/iziToast.min.css";
 const API_KEY = "51465381-3669693f35fe6c0ef244a196a"
 const BASE_URL = 'https://pixabay.com/api/'
 
-
+export const PER_PAGE = 15;
 export async function getImagesByQuery(query, page = 1) {
     try {
+        
     const res = await axios.get('https://pixabay.com/api/', {
         params:{
         key: API_KEY,
@@ -16,7 +17,7 @@ export async function getImagesByQuery(query, page = 1) {
         orientation: "horizontal",
         safesearch: true,
         page: page,
-        per_page: 15,
+        per_page: PER_PAGE,
         
         }
       

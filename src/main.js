@@ -1,4 +1,4 @@
-import {getImagesByQuery} from './js/pixabay-api.js';
+import {getImagesByQuery, PER_PAGE} from './js/pixabay-api.js';
 import {createGallery, clearGallery, showLoader, hideLoader, showLoadMoreButton, hideLoadMoreButton} from './js/render-functions.js';
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
@@ -22,12 +22,7 @@ async function handlerSubmit(event) {
     event.preventDefault();
     const query = input.value.trim();
 
-    if(query !== currentQuery) {
-        currentQuery = query;
-        currentPage = 1;
-        clearGallery();
-        hideLoadMoreButton();
-    }
+
     if(query === "") {
         iziToast.show({
         title: 'Ой, що це коїться???',
@@ -37,8 +32,14 @@ async function handlerSubmit(event) {
     });
         return;
     } 
+    currentQuery = query;
+     currentPage = 1;
+     totalHits = 0;
     clearGallery();
+    hideLoadMoreButton();
     showLoader();
+
+
 try{
         const {hits, totalHits: newTotalHits} = await getImagesByQuery(query, currentPage);
         
@@ -54,9 +55,10 @@ try{
                return;
             } 
             createGallery(hits);
-            currentPage++;
+           
             totalHits = newTotalHits;
-            if (currentPage <= Math.ceil(totalHits / 15)) {
+           
+            if (currentPage < Math.ceil(totalHits / PER_PAGE)) {
                 showLoadMoreButton();
             } else {
                 hideLoadMoreButton();
@@ -66,6 +68,7 @@ try{
 
                 });
             }
+             currentPage++;
         } catch (error) {
             iziToast.error({
                 message: "Щось пішло не так при завантаженні зображень",
@@ -86,19 +89,22 @@ try{
 
         const {hits} = await getImagesByQuery(currentQuery, currentPage);
         createGallery(hits);
-        currentPage++;
-
         scroll();
 
         
 
-        if(currentPage > Math.ceil(totalHits / 15)) {
+        if(currentPage < Math.ceil(totalHits / PER_PAGE)) {
+            showLoadMoreButton();
+           
+        } else {
             hideLoadMoreButton();
-            iziToast.info({
+             iziToast.info({
                 message: "We're sorry, but you've reached the end of search results.",
                 position: 'topRight',
             });
         }
+
+         currentPage++;
     } catch (error) {
         iziToast.error({
             message: " Не вдалося завантажити більше зображень",
